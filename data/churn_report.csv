@@ -1,0 +1,15 @@
+Index,Churn_Prob,Recommendation
+0,0.9994,Total day minutes: 134.4 → 196.0 | Total night charge: 8.71 → 7.58
+1,0.9977,Total intl calls: 2.0 → 6.0
+2,0.0051,Not recommended
+3,0.9999,Voice mail plan: 0.0 → 1.0 | Total night charge: 14.04 → 11.23
+4,0.9961,Total day minutes: 172.7 → 246.2
+5,0.9972,Voice mail plan: 0.0 → 1.0 | Total day charge: 45.32 → 47.75
+6,0.0038,Not recommended
+7,0.9726,Total day minutes: 296.4 → 180.1
+8,0.9993,International plan: 1.0 → 0.0 | Number vmail messages: 0.0 → 41.0
+9,0.8207,Voice mail plan: 0.0 → 1.0 | Total day minutes: 234.4 → 250.3
+10,0.9984,Total intl minutes: 14.3 → 5.5
+11,0.9327,Total day charge: 35.92 → 39.22 | Customer service calls: 4.0 → 0.0
+12,0.0023,Not recommended
+13,0.9951,Total day minutes: 279.8 → 221.0

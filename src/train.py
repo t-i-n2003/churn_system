@@ -15,7 +15,6 @@ os.makedirs(MODEL_DIR, exist_ok=True)
 train_path = os.path.join(DATA_DIR, 'train-80.csv')
 test_path = os.path.join(DATA_DIR, 'test-20.csv')
 
-# ---------- Các hàm mô hình ----------
 def xgboost_model(trainX, trainy, testX, testy):
     model = XGBClassifier(scale_pos_weight=6, use_label_encoder=False, eval_metric='logloss')
     model.fit(trainX, trainy)
@@ -59,10 +58,9 @@ def main():
     train = pd.read_csv(train_path)
     test = pd.read_csv(test_path)
 
-    # Encode dữ liệu
     le = LabelEncoder()
     train['State'] = le.fit_transform(train['State'])
-    test['State'] = le.transform(test['State'])  # dùng transform để giữ mapping cũ
+    test['State'] = le.transform(test['State'])
 
     binary_columns = ['International plan', 'Voice mail plan']
     for col in binary_columns:
@@ -72,7 +70,6 @@ def main():
     train['Churn'] = train['Churn'].astype(int)
     test['Churn'] = test['Churn'].astype(int)
 
-    # Xử lý cột
     target_column = 'Churn'
     drop_cols = ['Account length', 'Area code']
     feature_columns = [col for col in train.columns if col not in drop_cols + [target_column]]
@@ -82,13 +79,11 @@ def main():
     testX = test[feature_columns]
     testy = test[target_column]
 
-    # Thống kê
     basic_statistics(train)
 
-    # Lưu feature columns
+
     joblib.dump(feature_columns, os.path.join(MODEL_DIR, 'features.pkl'))
 
-    # Lưu metadata DiCE
     continuous_features = [col for col in feature_columns if pd.api.types.is_numeric_dtype(trainX[col])]
     categorical_features = [col for col in feature_columns if col not in continuous_features]
     metadata = {
@@ -97,7 +92,6 @@ def main():
     }
     joblib.dump(metadata, os.path.join(MODEL_DIR, 'feature_metadata.pkl'))
 
-    # Huấn luyện & lưu model
     model_funcs = {
         'xgb_model.pkl': xgboost_model,
         'logistic_model.pkl': logistic_regression_model,
@@ -113,4 +107,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    print("\n✅ Train script hoàn tất.")
+    print("\n✅ Train script completed.")

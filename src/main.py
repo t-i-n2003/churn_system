@@ -13,19 +13,16 @@ MODEL_DIR = os.path.join(BASE_DIR, '..', 'models')
 def generate_churn_report(df_input, model, feature_columns, metadata=None):
     df = df_input.copy()
     
-    # Xử lý thiếu cột
     missing_cols = set(feature_columns) - set(df.columns)
     for col in missing_cols:
         df[col] = 0
     df = df[feature_columns]
 
-    # Dự đoán xác suất churn
     churn_probs = model.predict_proba(df)[:, 1]
     results = []
 
-    # Thiết lập DiCE
     df_dice = df.copy()
-    df_dice['Churn'] = 0  # Giả định ban đầu không churn
+    df_dice['Churn'] = 0
 
     if metadata:
         cont_features = metadata.get("continuous_features", [])
@@ -49,9 +46,9 @@ def generate_churn_report(df_input, model, feature_columns, metadata=None):
 
     for idx, row in df.iterrows():
         prob = churn_probs[idx]
-        recommendation = "Không cần hành động"
+        recommendation = "Not recommended"
         
-        if prob > 0.6:  # Ngưỡng churn cao
+        if prob > 0.6:
             try:
                 cf = dice.generate_counterfactuals(
                     df_dice.iloc[[idx]][feature_columns],
@@ -68,7 +65,6 @@ def generate_churn_report(df_input, model, feature_columns, metadata=None):
                         original = row[col]
                         new = cf_row[col]
                         
-                        # Kiểm tra thay đổi
                         if (col in cont_features and not np.isclose(original, new, atol=1e-4)) or \
                            (col in cat_features and original != new):
                                 changes.append(f"{col}: {original} → {new}")
@@ -76,7 +72,7 @@ def generate_churn_report(df_input, model, feature_columns, metadata=None):
                     if changes:
                         recommendation = " | ".join(changes)
             except Exception:
-                recommendation = "Lỗi khi sinh gợi ý"
+                recommendation = "Error in generating counterfactuals"
 
         results.append({
             "Index": idx,
@@ -87,18 +83,15 @@ def generate_churn_report(df_input, model, feature_columns, metadata=None):
     return pd.DataFrame(results)
 
 if __name__ == "__main__":
-    # Load model và features
+
     model = joblib.load(os.path.join(MODEL_DIR, "xgb_model.pkl"))
     feature_columns = joblib.load(os.path.join(MODEL_DIR, "features.pkl"))
     
-    # Load metadata nếu có
     metadata_path = os.path.join(MODEL_DIR, "feature_metadata.pkl")
     metadata = joblib.load(metadata_path) if os.path.exists(metadata_path) else None
 
-    # Load dữ liệu
     df = pd.read_csv(os.path.join(DATA_DIR, "new_customers_minit.csv"))
     
-    # Tiền xử lý cơ bản
     if 'State' in df.columns:
         df['State'] = LabelEncoder().fit_transform(df['State'])
     if 'International plan' in df.columns:
@@ -106,7 +99,6 @@ if __name__ == "__main__":
     if 'Voice mail plan' in df.columns:
         df['Voice mail plan'] = df['Voice mail plan'].map({'Yes': 1, 'No': 0})
 
-    # Tạo báo cáo
     report = generate_churn_report(
         df_input=df,
         model=model,
